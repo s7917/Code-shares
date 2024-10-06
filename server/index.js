@@ -20,7 +20,7 @@ const Port = process.env.Port || 5000;
     });
   }
 io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    // console.log(`User connected: ${socket.id}`);
     socket.on("join-room", ({roomId, username})=>{
        userSocketMap[socket.id]= username;
          socket.join(roomId);
@@ -35,8 +35,30 @@ io.on("connection", (socket) => {
                 });
          });
     });
+    socket.on("code-change", ({roomId, code})=>{
+        socket.in(roomId).emit("code-change", {code});
+    });
+
+  //   socket.on("sync-code", ({socketId, code})=>{
+  //     io.to(socketId).emit("sync-code", {code});
+  // });
+
+
+    socket.on('disconnecting' , ()=>{
+      const rooms = [...socket.rooms];
+      rooms.forEach((roomId)=>{
+        socket.in(roomId).emit("disconnected",{
+          socketId : socket.id,
+           username : userSocketMap[socket.id],
+        })
+      })
+      delete userSocketMap[socket.id];
+      socket.leave();
+    })
   
   });
+
+ 
 
 server.listen(Port , ()=>{
     console.log(`Server is running on port ${Port}`);

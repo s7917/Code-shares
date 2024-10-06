@@ -12,10 +12,7 @@ function Editorpage() {
   const location = useLocation();
   const {roomId} = useParams();
   const navigate = useNavigate();
-  const[clients ,SetClients] = useState([
-    {socketid:"1",username:"shubham"},
-    {socketid:"2",username:"Raj"}
-  ]);
+  const[clients ,SetClients] = useState([]);
 
   const handleError =(e)=>{
     console.log('socket error', e);
@@ -36,18 +33,28 @@ function Editorpage() {
                 if( username !== location.state?.username){
                      toast.success(`${username} has joined the room`,{duration:2000});
                 }
-                // SetClients(clients);
-              }
-
-            );   
+                SetClients(clients);
+              } );   
+              // for dissconnecton yaha hum listem karenge
+              socketRef.current.on('disconnected',(
+                {socketId, username,})=>{
+                  toast.success(`${username} leave`);
+                  SetClients((prev)=>{
+                    return prev.filter(
+                      (clients)=> clients.socketId != socketId
+                    )
+                  })
+                }
+              )
    }  
-   if (location.state?.username) {
     init();
-  } else {
-    // If no username in state, navigate back to home
-    navigate('/');
-  }
-  },[roomId, location.state?.username]);
+    return ()=>{
+      socketRef.current.disconnect();
+      socketRef.current.off('joined');
+      socketRef.current.off('disconnected');
+    };
+
+  },[]);
 
 
 
@@ -79,7 +86,7 @@ function Editorpage() {
 
         {/* right section of editor page */}
         <div className='col-md-10  text-light d-flex flex-column ' >
-           < Editor/>
+           < Editor socketRef = {socketRef} roomId = {roomId}/>
         </div>
       </div>
     </div>
