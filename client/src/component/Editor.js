@@ -14,7 +14,7 @@ import { Socket } from 'socket.io-client';
 
 // code editor
 
-function Editor({socketRef , roomId}) {
+function Editor({socketRef , roomId , onCodeChange}) {
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -37,6 +37,7 @@ function Editor({socketRef , roomId}) {
       editor.on("change", (instance, changes) => {
         const { origin } = changes;
         const code = instance.getValue();
+        onCodeChange(code);
         if (origin !== 'setValue' && socketRef.current) {
           socketRef.current.emit("code-change", {
             roomId,

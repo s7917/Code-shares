@@ -12,7 +12,7 @@ function App() {
       <Toaster position='top-center '></Toaster>
       <Routes>
         <Route path='/' element={<Home/>}></Route>
-        <Route path='/editor/:roomid' element={<Editorpage/>} ></Route>
+        <Route path='/editor/:roomId' element={<Editorpage/>} ></Route>
       </Routes>
       </>
   );
